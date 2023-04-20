@@ -9,6 +9,21 @@ export class TodoPropsBuilder {
   private completed: boolean;
   private id?: string;
 
+  private DEFAULT_VALUES = {
+    userId: '1234',
+    title: 'New todo title',
+    completed: false,
+    id: 'todo1',
+  };
+
+  getDefault(): TodoPropsBuilder {
+    return this.withTitle(this.DEFAULT_VALUES.title)
+      .withId(this.DEFAULT_VALUES.id)
+      .withUserId(this.DEFAULT_VALUES.userId)
+      .withCompleted(this.DEFAULT_VALUES.completed)
+      .withCompleted(this.DEFAULT_VALUES.completed);
+  }
+
   withUserId(userId: string): TodoPropsBuilder {
     this.userId = userId;
     return this;

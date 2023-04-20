@@ -6,11 +6,10 @@ import { ApplicationErrors } from '@src/lib/bounded-contexts/todo/todo/applicati
 import { TodoPropsBuilder } from '../../builders/todo-props.builder';
 import { Application, ok, fail, Domain } from '@bitloops/bl-boilerplate-core';
 import { DomainErrors } from '@src/lib/bounded-contexts/todo/todo/domain/errors';
-import { mockAsyncLocalStorageGet } from '../../mocks/mockAsynLocalStorageGet.mock';
 import { ContextBuilder } from '../../builders/context.builder';
 import { MockTodoWriteRepo } from './todo-write-repo.mock';
 
-describe('Feature: Complete todo feature test', () => {
+describe('Feature: Complete todo', () => {
   it(`Scenario: Todo is completed successfully:
     Given that a valid todo exists and it is not completed
     When a complete todo command is issued
@@ -19,57 +18,49 @@ describe('Feature: Complete todo feature test', () => {
     And the result should be ok`, async () => {
     // given
 
-    const COMPLETE_TODO_SUCCESS_PRIMITIVES = {
-      userId: { id: '1234' },
-      id: 'todo1',
-      title: { title: 'New todo title' },
-      completed: false,
-    };
+    const initialTodoProps = new TodoPropsBuilder().getDefault().build();
 
-    mockAsyncLocalStorageGet(COMPLETE_TODO_SUCCESS_PRIMITIVES.userId.id);
-
-    const todo = TodoEntity.fromPrimitives(COMPLETE_TODO_SUCCESS_PRIMITIVES);
-    const output = Promise.resolve(ok(todo));
+    const todo = TodoEntity.create(initialTodoProps).value;
 
     const mockTodoWriteRepo = new MockTodoWriteRepo();
 
-    mockTodoWriteRepo.__bl__populateTestData('getById', output);
+    mockTodoWriteRepo.__bl__populateTestData(
+      'getById',
+      Promise.resolve(ok(todo)),
+    );
     mockTodoWriteRepo.__bl__populateTestData('update', Promise.resolve(ok()));
 
-    console.log(`When a complete todo command is executed`);
+    // when
     const completeTodoCommand = new CompleteTodoCommand(
-      { todoId: COMPLETE_TODO_SUCCESS_PRIMITIVES.id },
+      { todoId: initialTodoProps.id.toString() },
       {
         context: new ContextBuilder()
           .withJWT('jwt')
-          .withUserId(COMPLETE_TODO_SUCCESS_PRIMITIVES.userId.id)
+          .withUserId(initialTodoProps.userId.id.toString())
           .build(),
       },
     );
 
-    // when
     const completeTodoHandler = new CompleteTodoHandler(
       mockTodoWriteRepo.getMockTodoWriteRepo(),
     );
     const result = await completeTodoHandler.execute(completeTodoCommand);
 
     //then
-    const todoProps = new TodoPropsBuilder()
-      .withTitle(COMPLETE_TODO_SUCCESS_PRIMITIVES.title.title)
+    const mutatedTodoProps = new TodoPropsBuilder()
+      .getDefault()
       .withCompleted(true)
-      .withUserId(COMPLETE_TODO_SUCCESS_PRIMITIVES.userId.id)
-      .withId(COMPLETE_TODO_SUCCESS_PRIMITIVES.id)
       .build();
 
     expect(mockTodoWriteRepo.mockGetByIdMethod).toHaveBeenCalledWith(
-      new Domain.UUIDv4(COMPLETE_TODO_SUCCESS_PRIMITIVES.id),
+      initialTodoProps.id,
     );
     expect(mockTodoWriteRepo.mockUpdateMethod).toHaveBeenCalledWith(
       expect.any(TodoEntity),
     );
 
     const todoAggregate = mockTodoWriteRepo.mockUpdateMethod.mock.calls[0][0];
-    expect(todoAggregate.props).toEqual(todoProps);
+    expect(todoAggregate.props).toEqual(mutatedTodoProps);
     expect(todoAggregate.domainEvents[0]).toBeInstanceOf(
       TodoCompletedDomainEvent,
     );
@@ -83,14 +74,8 @@ describe('Feature: Complete todo feature test', () => {
       And a todo not found error should be returned
     `, async () => {
     // given
-    const COMPLETE_TODO_NOT_FOUND_CASE = {
-      userId: { id: '123' },
-      id: 'todo2',
-      title: { title: 'New todo title' },
-      completed: false,
-    };
 
-    mockAsyncLocalStorageGet(COMPLETE_TODO_NOT_FOUND_CASE.userId.id);
+    const initialTodoProps = new TodoPropsBuilder().getDefault().build();
 
     const output = Promise.resolve(
       fail(new ApplicationErrors.TodoNotFoundError('Todo not found')),
@@ -100,7 +85,7 @@ describe('Feature: Complete todo feature test', () => {
     mockTodoWriteRepo.__bl__populateTestData('getById', output);
 
     const completeTodoCommand = new CompleteTodoCommand({
-      todoId: COMPLETE_TODO_NOT_FOUND_CASE.id,
+      todoId: initialTodoProps.id.toString(),
     });
 
     // when
@@ -111,7 +96,7 @@ describe('Feature: Complete todo feature test', () => {
 
     //then
     expect(mockTodoWriteRepo.mockGetByIdMethod).toHaveBeenCalledWith(
-      new Domain.UUIDv4(COMPLETE_TODO_NOT_FOUND_CASE.id),
+      initialTodoProps.id,
     );
     expect(result.value).toBeInstanceOf(ApplicationErrors.TodoNotFoundError);
   });
@@ -122,27 +107,20 @@ describe('Feature: Complete todo feature test', () => {
       Then the todo should not be persisted 
       And a todo was already completed error should be issued`, async () => {
     // given
-    const COMPLETE_TODO_ALREADY_COMPLETED_PRIMITIVES = {
-      userId: { id: '123' },
-      id: 'todo5',
-      title: { title: 'New todo title' },
-      completed: true,
-    };
 
-    const todo = TodoEntity.fromPrimitives(
-      COMPLETE_TODO_ALREADY_COMPLETED_PRIMITIVES,
-    );
+    const initialTodoProps = new TodoPropsBuilder()
+      .getDefault()
+      .withCompleted(true)
+      .build();
+
+    const todo = TodoEntity.create(initialTodoProps).value;
     const output = Promise.resolve(ok(todo));
-
-    mockAsyncLocalStorageGet(
-      COMPLETE_TODO_ALREADY_COMPLETED_PRIMITIVES.userId.id,
-    );
 
     const mockCompleteTodoRepo = new MockTodoWriteRepo();
     mockCompleteTodoRepo.__bl__populateTestData('getById', output);
 
     const completeTodoCommand = new CompleteTodoCommand({
-      todoId: COMPLETE_TODO_ALREADY_COMPLETED_PRIMITIVES.id,
+      todoId: initialTodoProps.id.toString(),
     });
 
     // when
@@ -153,31 +131,21 @@ describe('Feature: Complete todo feature test', () => {
 
     //then
     expect(mockCompleteTodoRepo.mockGetByIdMethod).toHaveBeenCalledWith(
-      new Domain.UUIDv4(COMPLETE_TODO_ALREADY_COMPLETED_PRIMITIVES.id),
+      initialTodoProps.id,
     );
     expect(result.value).toBeInstanceOf(DomainErrors.TodoAlreadyCompletedError);
   });
 
   it(`Scenario: Todo failed to be completed, due to an unexpected repository error
-    Given that a valid todo exists which is not completed
+    Given that a todo exists which is not completed
     When a complete todo command is issued
     Then the todo should not be persisted
     And an unexpected repository error should be returned
   `, async () => {
-    console.log(`given that the todo exists and is not completed`);
-    const COMPLETE_TODO_REPO_ERROR_GETBYID_PRIMITIVES = {
-      userId: { id: '123' },
-      id: 'todo3',
-      title: { title: 'New todo title' },
-      completed: false,
-    };
+    const initialTodoProps = new TodoPropsBuilder().getDefault().build();
 
     const output = Promise.resolve(
       fail(new Application.Repo.Errors.Unexpected('Unexpected error')),
-    );
-
-    mockAsyncLocalStorageGet(
-      COMPLETE_TODO_REPO_ERROR_GETBYID_PRIMITIVES.userId.id,
     );
 
     // given
@@ -185,7 +153,7 @@ describe('Feature: Complete todo feature test', () => {
     mockTodoWriteRepo.__bl__populateTestData('getById', output);
 
     const completeTodoCommand = new CompleteTodoCommand({
-      todoId: COMPLETE_TODO_REPO_ERROR_GETBYID_PRIMITIVES.id,
+      todoId: initialTodoProps.id.toString(),
     });
 
     // when
@@ -196,36 +164,27 @@ describe('Feature: Complete todo feature test', () => {
 
     //then
     expect(mockTodoWriteRepo.mockGetByIdMethod).toHaveBeenCalledWith(
-      new Domain.UUIDv4(COMPLETE_TODO_REPO_ERROR_GETBYID_PRIMITIVES.id),
+      initialTodoProps.id,
     );
     expect(result.value).toBeInstanceOf(Application.Repo.Errors.Unexpected);
   });
 
   it(`Scenario: Todo failed to be completed, because of an unexpected repository error
-      Given that a valid todo exists which is not completed
+      Given that a todo exists which is not completed
       When a complete todo command is issued
       Then the todo should not be persisted
       And an unexpected repository error should be returned
     `, async () => {
-    const COMPLETE_TODO_REPO_ERROR_SAVE_PRIMITIVES = {
-      userId: { id: '123' },
-      id: 'todo4',
-      title: { title: 'New todo title' },
-      completed: false,
-    };
+    const initialTodoProps = new TodoPropsBuilder().getDefault().build();
 
-    mockAsyncLocalStorageGet(
-      COMPLETE_TODO_REPO_ERROR_SAVE_PRIMITIVES.userId.id,
-    );
-
-    const todo = TodoEntity.fromPrimitives(
-      COMPLETE_TODO_REPO_ERROR_SAVE_PRIMITIVES,
-    );
-    const output = Promise.resolve(ok(todo));
+    const todo = TodoEntity.create(initialTodoProps).value;
 
     // given
     const mockTodoWriteRepo = new MockTodoWriteRepo();
-    mockTodoWriteRepo.__bl__populateTestData('getById', output);
+    mockTodoWriteRepo.__bl__populateTestData(
+      'getById',
+      Promise.resolve(ok(todo)),
+    );
 
     mockTodoWriteRepo.__bl__populateTestData(
       'update',
@@ -235,11 +194,11 @@ describe('Feature: Complete todo feature test', () => {
     );
 
     const completeTodoCommand = new CompleteTodoCommand(
-      { todoId: COMPLETE_TODO_REPO_ERROR_SAVE_PRIMITIVES.id },
+      { todoId: initialTodoProps.id.toString() },
       {
         context: new ContextBuilder()
           .withJWT('jwt')
-          .withUserId(COMPLETE_TODO_REPO_ERROR_SAVE_PRIMITIVES.userId.id)
+          .withUserId(initialTodoProps.userId.id.toString())
           .build(),
       },
     );
@@ -253,8 +212,9 @@ describe('Feature: Complete todo feature test', () => {
 
     //then
     expect(mockTodoWriteRepo.mockGetByIdMethod).toHaveBeenCalledWith(
-      new Domain.UUIDv4(COMPLETE_TODO_REPO_ERROR_SAVE_PRIMITIVES.id),
+      initialTodoProps.id,
     );
+
     expect(mockTodoWriteRepo.mockUpdateMethod).toHaveBeenCalledWith(
       expect.any(TodoEntity),
     );
