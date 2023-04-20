@@ -6,7 +6,6 @@ import { ApplicationErrors } from '@src/lib/bounded-contexts/todo/todo/applicati
 import { TodoPropsBuilder } from '../../builders/todo-props.builder';
 import { Application, ok, fail, Domain } from '@bitloops/bl-boilerplate-core';
 import { DomainErrors } from '@src/lib/bounded-contexts/todo/todo/domain/errors';
-import { ContextBuilder } from '../../builders/context.builder';
 import { MockTodoWriteRepo } from './todo-write-repo.mock';
 
 describe('Feature: Complete todo', () => {
@@ -31,15 +30,9 @@ describe('Feature: Complete todo', () => {
     mockTodoWriteRepo.__bl__populateTestData('update', Promise.resolve(ok()));
 
     // when
-    const completeTodoCommand = new CompleteTodoCommand(
-      { todoId: initialTodoProps.id.toString() },
-      {
-        context: new ContextBuilder()
-          .withJWT('jwt')
-          .withUserId(initialTodoProps.userId.id.toString())
-          .build(),
-      },
-    );
+    const completeTodoCommand = new CompleteTodoCommand({
+      todoId: initialTodoProps.id.toString(),
+    });
 
     const completeTodoHandler = new CompleteTodoHandler(
       mockTodoWriteRepo.getMockTodoWriteRepo(),
@@ -193,15 +186,9 @@ describe('Feature: Complete todo', () => {
       ),
     );
 
-    const completeTodoCommand = new CompleteTodoCommand(
-      { todoId: initialTodoProps.id.toString() },
-      {
-        context: new ContextBuilder()
-          .withJWT('jwt')
-          .withUserId(initialTodoProps.userId.id.toString())
-          .build(),
-      },
-    );
+    const completeTodoCommand = new CompleteTodoCommand({
+      todoId: initialTodoProps.id.toString(),
+    });
 
     // when
     const completeTodoHandler = new CompleteTodoHandler(
