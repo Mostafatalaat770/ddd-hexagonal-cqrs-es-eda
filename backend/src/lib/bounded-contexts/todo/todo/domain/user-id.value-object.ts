@@ -1,6 +1,6 @@
 import { Domain, Either, ok } from '@bitloops/bl-boilerplate-core';
 
-interface UserIdProps {
+export interface UserIdProps {
   id: Domain.UUIDv4;
 }
 

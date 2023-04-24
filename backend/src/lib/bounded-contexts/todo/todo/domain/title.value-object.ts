@@ -2,7 +2,7 @@ import { Domain, Either, ok, fail } from '@bitloops/bl-boilerplate-core';
 import { DomainErrors } from './errors';
 import { Rules } from './rules';
 
-interface TitleProps {
+export interface TitleProps {
   title: string;
 }
 

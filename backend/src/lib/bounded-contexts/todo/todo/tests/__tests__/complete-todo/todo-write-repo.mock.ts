@@ -34,7 +34,7 @@ type MockMethodsDataType = Record<string, IQueue<Either<any, any>>>;
 abstract class MockRepo {
   protected mocks: MockMethodsDataType = {};
 
-  public __bl__populateTestData(
+  protected __bl__populateTestData(
     methodName: keyof TodoWriteRepoPort,
     mockOutputData: MockOutputDataType,
   ) {
@@ -55,7 +55,7 @@ abstract class MockRepo {
 export class MockTodoWriteRepo extends MockRepo {
   public readonly mockUpdateMethod: jest.Mock;
   public readonly mockGetByIdMethod: jest.Mock;
-  private mockTodoWriteRepo: TodoWriteRepoPort;
+  private readonly mockTodoWriteRepo: TodoWriteRepoPort;
 
   constructor() {
     super();
@@ -76,7 +76,7 @@ export class MockTodoWriteRepo extends MockRepo {
   private getByIdMethod(): jest.Mock {
     return jest.fn(() => {
       const methodData = this.__bl__getTestOutputByMethodName('getById');
-      return methodData;
+      return Promise.resolve(methodData);
     });
   }
 
@@ -87,5 +87,13 @@ export class MockTodoWriteRepo extends MockRepo {
         return Promise.resolve(methodData);
       },
     );
+  }
+
+  public __add__getById(mockOutputData: MockOutputDataType) {
+    this.__bl__populateTestData('getById', mockOutputData);
+  }
+
+  public __add__update(mockOutputData: MockOutputDataType) {
+    this.__bl__populateTestData('update', mockOutputData);
   }
 }
