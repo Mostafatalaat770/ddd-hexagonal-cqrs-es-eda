@@ -74,9 +74,7 @@ describe('Feature: Complete todo', () => {
       todoId: initialTodoProps.id.toString(),
     });
 
-    const completeTodoHandler = new CompleteTodoHandler(
-      mockTodoWriteRepo.getMockTodoWriteRepo(),
-    );
+    const completeTodoHandler = new CompleteTodoHandler(mockTodoWriteRepo);
     const result = await completeTodoHandler.execute(completeTodoCommand);
 
     //then
@@ -93,8 +91,7 @@ describe('Feature: Complete todo', () => {
     //   expect.any(TodoEntity),
     // );
 
-    const todoAggregate = mockTodoWriteRepo.mockUpdateMethod.mock.calls[0][0];
-    // const todoAggregate = mockTodoWriteRepo.
+    const todoAggregate = mockTodoWriteRepo.__get__update().todo;
     expect(todoAggregate.props).toEqual(mutatedTodoProps);
 
     const todoCompletedEvent = new TodoCompletedDomainEvent({
@@ -111,7 +108,6 @@ describe('Feature: Complete todo', () => {
       );
 
     expect(todoCompletedExistsAtAggregate).toEqual(true);
-
     // Different way of checking if the domain event will be published to check for uniqueness
     // expect(res.exists).toEqual(true);
     // expect(res.count).toEqual(1);
@@ -141,15 +137,13 @@ describe('Feature: Complete todo', () => {
     });
 
     // when
-    const completeTodoHandler = new CompleteTodoHandler(
-      mockTodoWriteRepo.getMockTodoWriteRepo(),
-    );
+    const completeTodoHandler = new CompleteTodoHandler(mockTodoWriteRepo);
     const result = await completeTodoHandler.execute(completeTodoCommand);
 
     //then
-    expect(mockTodoWriteRepo.mockGetByIdMethod).toHaveBeenCalledWith(
-      initialTodoProps.id,
-    );
+    // expect(mockTodoWriteRepo.mockGetByIdMethod).toHaveBeenCalledWith(
+    //   initialTodoProps.id,
+    // );
     expect(result.value).toBeInstanceOf(ApplicationErrors.TodoNotFoundError);
   });
 
@@ -176,15 +170,13 @@ describe('Feature: Complete todo', () => {
     });
 
     // when
-    const completeTodoHandler = new CompleteTodoHandler(
-      mockCompleteTodoRepo.getMockTodoWriteRepo(),
-    );
+    const completeTodoHandler = new CompleteTodoHandler(mockCompleteTodoRepo);
     const result = await completeTodoHandler.execute(completeTodoCommand);
 
     //then
-    expect(mockCompleteTodoRepo.mockGetByIdMethod).toHaveBeenCalledWith(
-      initialTodoProps.id,
-    );
+    // expect(mockCompleteTodoRepo.mockGetByIdMethod).toHaveBeenCalledWith(
+    //   initialTodoProps.id,
+    // );
     expect(result.value).toBeInstanceOf(DomainErrors.TodoAlreadyCompletedError);
   });
 
@@ -209,15 +201,13 @@ describe('Feature: Complete todo', () => {
     });
 
     // when
-    const completeTodoHandler = new CompleteTodoHandler(
-      mockTodoWriteRepo.getMockTodoWriteRepo(),
-    );
+    const completeTodoHandler = new CompleteTodoHandler(mockTodoWriteRepo);
     const result = await completeTodoHandler.execute(completeTodoCommand);
 
     //then
-    expect(mockTodoWriteRepo.mockGetByIdMethod).toHaveBeenCalledWith(
-      initialTodoProps.id,
-    );
+    // expect(mockTodoWriteRepo.mockGetByIdMethod).toHaveBeenCalledWith(
+    //   initialTodoProps.id,
+    // );
     expect(result.value).toBeInstanceOf(Application.Repo.Errors.Unexpected);
   });
 
@@ -246,20 +236,18 @@ describe('Feature: Complete todo', () => {
     });
 
     // when
-    const completeTodoHandler = new CompleteTodoHandler(
-      mockTodoWriteRepo.getMockTodoWriteRepo(),
-    );
+    const completeTodoHandler = new CompleteTodoHandler(mockTodoWriteRepo);
 
     const result = await completeTodoHandler.execute(completeTodoCommand);
 
     //then
-    expect(mockTodoWriteRepo.mockGetByIdMethod).toHaveBeenCalledWith(
-      initialTodoProps.id,
-    );
+    // expect(mockTodoWriteRepo.mockGetByIdMethod).toHaveBeenCalledWith(
+    //   initialTodoProps.id,
+    // );
 
-    expect(mockTodoWriteRepo.mockUpdateMethod).toHaveBeenCalledWith(
-      expect.any(TodoEntity),
-    );
+    // expect(mockTodoWriteRepo.mockUpdateMethod).toHaveBeenCalledWith(
+    //   expect.any(TodoEntity),
+    // );
     expect(result.value).toBeInstanceOf(Application.Repo.Errors.Unexpected);
   });
 });

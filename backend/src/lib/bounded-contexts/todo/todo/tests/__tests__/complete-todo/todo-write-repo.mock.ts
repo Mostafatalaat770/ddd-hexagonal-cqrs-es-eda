@@ -1,5 +1,6 @@
-import { Application, Either } from '@bitloops/bl-boilerplate-core';
+import { Application, Domain, Either } from '@bitloops/bl-boilerplate-core';
 import { TodoWriteRepoPort } from '@src/lib/bounded-contexts/todo/todo/ports/todo-write.repo-port';
+import { TodoEntity } from '../../../domain/todo.entity';
 
 interface IQueue<T> {
   enqueue(item: T): void;
@@ -30,11 +31,14 @@ class Queue<T> implements IQueue<T> {
 
 type MockOutputDataType = any;
 type MockMethodsDataType = Record<string, IQueue<Either<any, any>>>;
+type MockInputDataType = Record<string, any>;
+type InputsDataType = Record<string, MockInputDataType[]>;
 
 abstract class MockRepo {
   protected mocks: MockMethodsDataType = {};
+  protected inputs: InputsDataType = {};
 
-  protected __bl__populateTestData(
+  protected __populateTestOutputData(
     methodName: keyof TodoWriteRepoPort,
     mockOutputData: MockOutputDataType,
   ) {
@@ -44,56 +48,86 @@ abstract class MockRepo {
     this.mocks[methodName].enqueue(mockOutputData);
   }
 
-  protected __bl__getTestOutputByMethodName(
+  protected __populateTestInputData(
     methodName: keyof TodoWriteRepoPort,
+    mockInputData: MockInputDataType,
   ) {
+    if (!this.inputs[methodName]) {
+      this.inputs[methodName] = [];
+    }
+    this.inputs[methodName].push(mockInputData);
+  }
+
+  protected __getTestOutputByMethodName(methodName: keyof TodoWriteRepoPort) {
     const outputData = this.mocks[methodName].dequeue();
     return outputData;
   }
+
+  protected __getMethodInputsByMethodNameAndCall(
+    methodName: keyof TodoWriteRepoPort,
+    call: number,
+  ): MockInputDataType {
+    if (!this.inputs[methodName]) {
+      throw new Error('No inputs for this method');
+    }
+    if (!this.inputs[methodName][call]) {
+      throw new Error('No inputs for this call');
+    }
+    const methodInputs = this.inputs[methodName][call];
+    return methodInputs;
+  }
 }
 
-export class MockTodoWriteRepo extends MockRepo {
-  public readonly mockUpdateMethod: jest.Mock;
-  public readonly mockGetByIdMethod: jest.Mock;
-  private readonly mockTodoWriteRepo: TodoWriteRepoPort;
-
+export class MockTodoWriteRepo extends MockRepo implements TodoWriteRepoPort {
   constructor() {
     super();
-    this.mockUpdateMethod = this.updateMethod();
-    this.mockGetByIdMethod = this.getByIdMethod();
-    this.mockTodoWriteRepo = {
-      save: jest.fn(),
-      getById: this.mockGetByIdMethod,
-      update: this.mockUpdateMethod,
-      delete: jest.fn(),
-    };
   }
 
-  getMockTodoWriteRepo(): TodoWriteRepoPort {
-    return this.mockTodoWriteRepo;
+  public async save(
+    todo: TodoEntity,
+  ): Promise<Either<void, Application.Repo.Errors.Unexpected>> {
+    this.__populateTestInputData('getById', { todo });
+    const methodData = this.__getTestOutputByMethodName('save');
+    return methodData as Either<void, Application.Repo.Errors.Unexpected>;
   }
 
-  private getByIdMethod(): jest.Mock {
-    return jest.fn(() => {
-      const methodData = this.__bl__getTestOutputByMethodName('getById');
-      return Promise.resolve(methodData);
-    });
+  public async getById(
+    id: Domain.UUIDv4,
+  ): Promise<Either<TodoEntity | null, Application.Repo.Errors.Unexpected>> {
+    this.__populateTestInputData('getById', { id });
+    const methodData = this.__getTestOutputByMethodName('getById');
+    return methodData;
   }
 
-  private updateMethod(): jest.Mock {
-    return jest.fn(
-      (): Promise<Either<void, Application.Repo.Errors.Unexpected>> => {
-        const methodData = this.__bl__getTestOutputByMethodName('update');
-        return Promise.resolve(methodData);
-      },
-    );
+  public async update(
+    todo: TodoEntity,
+  ): Promise<Either<void, Application.Repo.Errors.Unexpected>> {
+    this.__populateTestInputData('update', { todo });
+    const methodData = this.__getTestOutputByMethodName('update');
+    return methodData as Either<void, Application.Repo.Errors.Unexpected>;
+  }
+
+  public async delete(
+    todo: TodoEntity,
+  ): Promise<Either<void, Application.Repo.Errors.Unexpected>> {
+    this.__populateTestInputData('delete', { todo });
+    const methodData = this.__getTestOutputByMethodName('delete');
+    return methodData as Either<void, Application.Repo.Errors.Unexpected>;
   }
 
   public __add__getById(mockOutputData: MockOutputDataType) {
-    this.__bl__populateTestData('getById', mockOutputData);
+    this.__populateTestOutputData('getById', mockOutputData);
   }
 
   public __add__update(mockOutputData: MockOutputDataType) {
-    this.__bl__populateTestData('update', mockOutputData);
+    this.__populateTestOutputData('update', mockOutputData);
+  }
+
+  public __get__getById(calls = 0) {
+    return this.__getMethodInputsByMethodNameAndCall('getById', calls);
+  }
+
+  public __get__update(calls = 0) {
+    return this.__getMethodInputsByMethodNameAndCall('update', calls);
   }
 }
