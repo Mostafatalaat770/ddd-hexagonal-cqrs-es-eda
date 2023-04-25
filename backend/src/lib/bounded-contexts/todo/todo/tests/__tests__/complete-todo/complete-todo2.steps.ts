@@ -91,7 +91,7 @@ describe('Feature: Complete todo', () => {
     //   expect.any(TodoEntity),
     // );
 
-    const todoAggregate = mockTodoWriteRepo.__get__update().todo;
+    const todoAggregate = mockTodoWriteRepo.__get__update().aggregate;
     expect(todoAggregate.props).toEqual(mutatedTodoProps);
 
     const todoCompletedEvent = new TodoCompletedDomainEvent({

@@ -86,7 +86,7 @@ export class MockTodoWriteRepo extends MockRepo implements TodoWriteRepoPort {
   public async save(
     todo: TodoEntity,
   ): Promise<Either<void, Application.Repo.Errors.Unexpected>> {
-    this.__populateTestInputData('getById', { todo });
+    this.__populateTestInputData('getById', { aggregate: todo });
     const methodData = this.__getTestOutputByMethodName('save');
     return methodData as Either<void, Application.Repo.Errors.Unexpected>;
   }
@@ -94,7 +94,7 @@ export class MockTodoWriteRepo extends MockRepo implements TodoWriteRepoPort {
   public async getById(
     id: Domain.UUIDv4,
   ): Promise<Either<TodoEntity | null, Application.Repo.Errors.Unexpected>> {
-    this.__populateTestInputData('getById', { id });
+    this.__populateTestInputData('getById', { aggregateRootId: id });
     const methodData = this.__getTestOutputByMethodName('getById');
     return methodData;
   }
@@ -102,7 +102,7 @@ export class MockTodoWriteRepo extends MockRepo implements TodoWriteRepoPort {
   public async update(
     todo: TodoEntity,
   ): Promise<Either<void, Application.Repo.Errors.Unexpected>> {
-    this.__populateTestInputData('update', { todo });
+    this.__populateTestInputData('update', { aggregate: todo });
     const methodData = this.__getTestOutputByMethodName('update');
     return methodData as Either<void, Application.Repo.Errors.Unexpected>;
   }
@@ -110,7 +110,7 @@ export class MockTodoWriteRepo extends MockRepo implements TodoWriteRepoPort {
   public async delete(
     todo: TodoEntity,
   ): Promise<Either<void, Application.Repo.Errors.Unexpected>> {
-    this.__populateTestInputData('delete', { todo });
+    this.__populateTestInputData('delete', { aggregate: todo });
     const methodData = this.__getTestOutputByMethodName('delete');
     return methodData as Either<void, Application.Repo.Errors.Unexpected>;
   }
