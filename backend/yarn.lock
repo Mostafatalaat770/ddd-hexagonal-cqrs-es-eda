@@ -1061,10 +1061,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@bitloops/bl-boilerplate-core@^0.3.6":
-  version "0.3.6"
-  resolved "https://registry.yarnpkg.com/@bitloops/bl-boilerplate-core/-/bl-boilerplate-core-0.3.6.tgz#b9036edeba48566aa307e26d0248002ee892725c"
-  integrity sha512-qGWwY8alc5npl9mdKlQal8D1XWT3hCk8ui1iNyQlmiQcvdbQGDPyN2FK+XdsqSmQs5UQtYC4lWFFKShnSHDHqw==
+"@bitloops/bl-boilerplate-core@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@bitloops/bl-boilerplate-core/-/bl-boilerplate-core-0.4.0.tgz#70890dbd8d53ee3d2698d5d0d3cf2bbd26ef3f77"
+  integrity sha512-9z2YcFAu2DO3o3xVG/Z95txF4wI1SzDo3pbG3j+bp1fZpTOg6X325qt8LMMHAMYGfEqs9RAIl0qaxiCXstW/VQ==
   dependencies:
     class-transformer "^0.5.1"
     nats "^2.10.2"
@@ -1078,11 +1078,12 @@
     "@nestjs/common" "^9.0.0"
     mongodb "^4.10.0"
 
-"@bitloops/bl-boilerplate-infra-nest-auth-passport@^0.1.4":
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/@bitloops/bl-boilerplate-infra-nest-auth-passport/-/bl-boilerplate-infra-nest-auth-passport-0.1.4.tgz#41bf4e80c4e949224d70713df3910b1065c0d28f"
-  integrity sha512-QEt49TpX4Z27DPDBdxnR7f7cJOUlYdIfDzVR4wsZY/53IA6kqdWjMjGXnJGqsIO4Bm24nCHpg3mHD3oW2WcdvQ==
+"@bitloops/bl-boilerplate-infra-nest-auth-passport@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@bitloops/bl-boilerplate-infra-nest-auth-passport/-/bl-boilerplate-infra-nest-auth-passport-0.2.0.tgz#d5222de576da467ed9581a4b7d1409311f277492"
+  integrity sha512-CcE+iDGZ3Nf5NQRlNnfUQIZRrL4XvXwTd+eP/FRHQjMF9nRdxEasWBf3Oud+pwN5lqcIG7cGxGTT5OLa83kcPQ==
   dependencies:
+    "@bitloops/bl-boilerplate-core" "^0.4.0"
     "@bitloops/bl-boilerplate-infra-postgres" "^0.1.1"
     "@nestjs/jwt" "^10.0.2"
     "@nestjs/passport" "^9.0.3"

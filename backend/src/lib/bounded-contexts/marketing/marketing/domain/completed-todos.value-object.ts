@@ -1,27 +1,35 @@
 import { Domain, Either, ok, fail } from '@bitloops/bl-boilerplate-core';
-import { DomainErrors } from '@src/lib/bounded-contexts/marketing/marketing/domain/errors';
-import { Rules } from './rules';
-
-interface CompletedTodosProps {
+import { CompletedTodosProps } from './completed-todos.props';
+import { DomainErrors } from './errors/index';
+import { DomainRules } from './rules/index';
+export type TCompletedTodosVOPrimitives = {
   counter: number;
-}
-
+};
 export class CompletedTodosVO extends Domain.ValueObject<CompletedTodosProps> {
-  get counter(): number {
-    return this.props.counter;
-  }
-
   private constructor(props: CompletedTodosProps) {
     super(props);
   }
-
   public static create(
-    props: CompletedTodosProps,
+    props: CompletedTodosProps
   ): Either<CompletedTodosVO, DomainErrors.InvalidTodosCounterError> {
     const res = Domain.applyRules([
-      new Rules.CompletedTodosIsPositiveNumber(props.counter),
+      new DomainRules.CompletedTodosIsPositiveNumberRule(props.counter),
     ]);
     if (res) return fail(res);
     return ok(new CompletedTodosVO(props));
+  }
+  get counter(): number {
+    return this.props.counter;
+  }
+  public static fromPrimitives(
+    data: TCompletedTodosVOPrimitives
+  ): CompletedTodosVO {
+    const CompletedTodosVOProps = { counter: data.counter };
+    return new CompletedTodosVO(CompletedTodosVOProps);
+  }
+  public toPrimitives(): TCompletedTodosVOPrimitives {
+    return {
+      counter: this.counter,
+    };
   }
 }
