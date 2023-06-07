@@ -52,9 +52,9 @@ export class ModifyTodoTitleCommandHandler
     if (title.isFail()) {
       return fail(title.value);
     }
-    const result_851320 = todoFound.value.modifyTitle(title.value);
-    if (result_851320.isFail()) {
-      return fail(result_851320.value);
+    const result_599480 = todoFound.value.modifyTitle(title.value);
+    if (result_599480.isFail()) {
+      return fail(result_599480.value);
     }
     const updateResult = await this.todoRepo.update(todoFound.value);
     if (updateResult.isFail()) {

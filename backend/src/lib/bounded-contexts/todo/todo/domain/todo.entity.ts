@@ -10,7 +10,7 @@ import { TodoUncompletedDomainEvent } from './events/todo-uncompleted.domain-eve
 import { TodoTitleModifiedDomainEvent } from './events/todo-title-modified.domain-event';
 import { TodoDeletedDomainEvent } from './events/todo-deleted.domain-event';
 export type TTodoEntityPrimitives = {
-  id: string;
+  id?: string;
   userId: TUserIdVOPrimitives;
   title: TTitleVOPrimitives;
   completed: boolean;

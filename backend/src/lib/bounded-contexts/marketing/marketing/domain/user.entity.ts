@@ -8,7 +8,7 @@ import { EmailVO, TEmailVOPrimitives } from './email.value-object';
 import { TodoCompletionsIncrementedDomainEvent } from './events/todo-completions-incremented.domain-event';
 import { DomainErrors } from './errors/index';
 export type TUserEntityPrimitives = {
-  id: string;
+  id?: string;
   completedTodos: TCompletedTodosVOPrimitives;
   email: TEmailVOPrimitives;
 };

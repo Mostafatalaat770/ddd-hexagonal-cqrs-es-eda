@@ -3,10 +3,10 @@ import { UserProps } from './user.props';
 import { EmailVO, TEmailVOPrimitives } from './email.value-object';
 import { UserChangedEmailDomainEvent } from './events/user-changed-email.domain-event';
 export type TUserEntityPrimitives = {
-  id: string;
+  id?: string;
   email: TEmailVOPrimitives;
   password: string;
-  lastLogin: string;
+  lastLogin?: string;
 };
 export class UserEntity extends Domain.Aggregate<UserProps> {
   private constructor(props: UserProps) {

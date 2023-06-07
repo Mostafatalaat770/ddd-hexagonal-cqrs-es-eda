@@ -1,7 +1,7 @@
 import { Domain, Either, ok } from '@bitloops/bl-boilerplate-core';
 import { NotificationTemplateProps } from './notification-template.props';
 export type TNotificationTemplateEntityPrimitives = {
-  id: string;
+  id?: string;
   template: string;
   type: string;
 };
